@@ -19,7 +19,7 @@ so they can grow together.
 HTML, CSS and JavaScript (front-end prototype)
 
 ## Live demo
-(paste your site link here after hosting)
+https://github.com/avanshika906-spec/Creatorlink
 
 ## Future plans
 - Free trial edits
