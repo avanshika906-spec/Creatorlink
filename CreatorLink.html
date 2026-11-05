@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CreatorLink</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#ffffff;--card:#f1ecfb;--ink:#2b1b4d;--mut:#5e5675;--acc:#ff6b5b;--accink:#ffffff;--line:#d9d0ee;--dark:#2b1b4d;--darkink:#ffffff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#17102b;--card:#241a42;--ink:#f1ecfb;--mut:#b8aed3;--line:#3a2d63;--dark:#3a2d63}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#17102b;--card:#241a42;--ink:#f1ecfb;--mut:#b8aed3;--line:#3a2d63;--dark:#3a2d63}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Calibri,Arial,sans-serif;font-size:16px;line-height:1.4}
+.wrap{max-width:720px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px}
+.logo{font-family:Cambria,Georgia,serif;font-weight:700;font-size:24px}
+.logo span{color:var(--acc)}
+h1,h2,h3{font-family:Cambria,Georgia,serif;margin:0 0 8px}
+h1{font-size:32px}h2{font-size:22px}h3{font-size:18px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+.btn{background:var(--acc);color:var(--accink);border:0;border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer}
+.btn.alt{background:var(--dark);color:var(--darkink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:14px}
+.btn:disabled{opacity:.6;cursor:default}
+.big{display:block;width:100%;padding:18px;font-size:18px;margin-bottom:12px;text-align:left}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;margin:4px 0 10px}
+label{font-weight:700;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.chip{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;cursor:pointer}
+.chip.on{background:var(--acc);color:var(--accink);border-color:var(--acc)}
+.tag{display:inline-block;background:var(--dark);color:var(--darkink);border-radius:999px;padding:2px 10px;font-size:13px;margin:0 6px 4px 0}
+.tabs{display:flex;gap:8px;margin-bottom:14px}
+.tabs .btn{flex:1}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.sample{background:var(--card);border-radius:14px;overflow:hidden}
+.sample .th{height:120px;display:flex;align-items:center;justify-content:center;font-size:40px;background:var(--dark)}
+.sample img{width:100%;height:120px;object-fit:cover;display:block}
+.sample .b{padding:10px}
+.mut{color:var(--mut);font-size:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--dark);color:var(--darkink);padding:10px 16px;border-radius:10px;display:none;z-index:5}
+.pv{max-width:160px;max-height:100px;border-radius:8px;display:block;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="wrap"><div id="app"></div></div>
+<div id="toast"></div>
+<script>
+const E=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TYPES=['Reels','YouTube','Shorts','Thumbnails','Gaming','Vlogs'];
+const ICON={Reels:'🎬',YouTube:'▶️',Shorts:'⚡',Thumbnails:'🖼️',Gaming:'🎮',Vlogs:'📷'};
+const S={me:null,view:'welcome',tab:'',d:{types:[]},viewing:null,n:10,chats:{},chat:null,
+users:[
+{id:'s1',role:'student',name:'Riya Sharma',handle:'riya.edits',types:['Reels','Shorts'],samples:[{title:'Travel reel edit',type:'Reels',desc:'Fast cuts with music sync',img:''},{title:'Cafe short',type:'Shorts',desc:'Smooth text and transitions',img:''}]},
+{id:'s2',role:'student',name:'Aman Verma',handle:'aman.cuts',types:['Gaming','YouTube'],samples:[{title:'Gaming montage',type:'Gaming',desc:'Highlights with sound effects',img:''}]},
+{id:'c1',role:'creator',name:'Neha Singh',handle:'neha.travels',types:['Reels','Vlogs'],samples:[]}],
+jobs:[
+{id:'j1',by:'c1',title:'Edit my 60s travel reel',type:'Reels',pay:'Small budget',desc:'Need clean cuts and trending music.',applicants:[],hired:null},
+{id:'j2',by:'c1',title:'Thumbnail for my vlog',type:'Thumbnails',pay:'Free (for credit)',desc:'Bright and simple, 1280x720.',applicants:[],hired:null}]};
+const U=id=>S.users.find(u=>u.id===id);
+function toast(t){const e=document.getElementById('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2200)}
+function chips(sel){return '<div class="chips">'+TYPES.map(t=>`<button class="chip ${sel.includes(t)?'on':''}" data-a="chip" data-v="${t}">${ICON[t]} ${t}</button>`).join('')+'</div>'}
+function opts(sel){return TYPES.map(t=>`<option ${sel===t?'selected':''}>${t}</option>`).join('')}
+function sample(x,del){return `<div class="sample">${x.img?`<img src="${x.img}" alt="${E(x.title)}">`:`<div class="th">${ICON[x.type]||'🎬'}</div>`}<div class="b"><b>${E(x.title)}</b><div class="mut">${E(x.type)}</div><div>${E(x.desc)}</div>${del!=null?`<button class="btn ghost sm" data-a="del" data-v="${del}">Remove</button>`:''}</div></div>`}
+function head(){return `<header><div class="logo">Creator<span>Link</span></div>${S.me?`<div class="row"><span class="mut">${E(S.me.name)} · ${S.me.role==='student'?'Student editor':'Creator'}</span><button class="btn ghost sm" data-a="out">Switch role</button></div>`:''}</header>`}
+function welcome(){return `<h1>Beginners helping beginners</h1><p class="mut">New creators get affordable editing. Student editors get real work. Pick who you are to start.</p>
+<button class="btn big" data-a="pick" data-v="creator">🎥 I’m a creator<br><small>I need a video edited</small></button>
+<button class="btn big alt" data-a="pick" data-v="student">✂️ I’m a student editor<br><small>I want to find work</small></button>`}
+function signup(){const st=S.role==='student',d=S.d;return `<h2>${st?'Create your editor ID':'Create your creator ID'}</h2><div class="card">
+<label>Your name</label><input data-f="name" value="${E(d.name||'')}" placeholder="e.g. Riya Sharma">
+<label>Choose your ID</label><input data-f="handle" value="${E(d.handle||'')}" placeholder="e.g. riya.edits">
+<label>${st?'What work can you do? (pick one or more)':'What work do you need? (pick one or more)'}</label>${chips(d.types)}
+<button class="btn" data-a="join">Start using CreatorLink</button> <button class="btn ghost" data-a="out">Back</button></div>`}
+function tabs(list){return `<div class="tabs">${list.map(([k,l])=>`<button class="btn ${S.tab===k?'':'ghost'}" data-a="tab" data-v="${k}">${l}</button>`).join('')}</div>`}
+function studentJobs(){const m=S.me.types;const js=[...S.jobs].sort((a,b)=>m.includes(b.type)-m.includes(a.type));
+return '<h2>Jobs for you</h2>'+js.map(j=>{const ap=j.applicants.includes(S.me.id),hi=j.hired===S.me.id;
+return `<div class="card"><div class="row"><b>${E(j.title)}</b><span>${hi?'✅ You’re hired!':ap?'<span class="mut">Applied</span>':`<button class="btn sm" data-a="apply" data-v="${j.id}">Apply</button>`}</span></div>
+<span class="tag">${ICON[j.type]||''} ${E(j.type)}</span><span class="tag">${E(j.pay)}</span><div class="mut">by ${E(U(j.by).name)} <button class="btn ghost sm" data-a="chat" data-v="${j.by}">💬 Chat</button></div><div>${E(j.desc)}</div></div>`}).join('')}
+function studentSamples(){const d=S.d;return `<h2>My work samples</h2><div class="card"><b>Add a sample</b><br>
+<label>Title</label><input data-f="stitle" value="${E(d.stitle||'')}" placeholder="e.g. My first reel">
+<label>Type</label><select data-f="stype">${opts(d.stype||TYPES[0])}</select>
+<label>About this work</label><textarea data-f="sdesc" rows="2" placeholder="What did you do in it?">${E(d.sdesc||'')}</textarea>
+<label>Picture (optional)</label>${d.simg?`<img class="pv" src="${d.simg}" alt="preview">`:''}<input type="file" accept="image/*" data-file="1">
+<button class="btn" data-a="addsample">Add to my work</button></div>
+${S.me.samples.length?`<div class="grid">${S.me.samples.map((x,i)=>sample(x,i)).join('')}</div>`:'<p class="mut">No samples yet. Add your first one so creators can see your work.</p>'}`}
+function editors(){const v=S.viewing&&U(S.viewing);
+if(v)return `<button class="btn ghost sm" data-a="back">← All editors</button><h2>${E(v.name)}</h2><div class="mut">@${E(v.handle)}</div><div>${v.types.map(t=>`<span class="tag">${ICON[t]} ${t}</span>`).join('')}</div>
+<p><button class="btn" data-a="invite" data-v="${v.id}">Invite to my job</button> <button class="btn alt" data-a="chat" data-v="${v.id}">💬 Chat</button></p>${v.samples.length?`<div class="grid">${v.samples.map(x=>sample(x)).join('')}</div>`:'<p class="mut">No samples yet.</p>'}`;
+return '<h2>Find student editors</h2>'+S.users.filter(u=>u.role==='student').map(u=>`<div class="card"><div class="row"><b>${E(u.name)}</b><button class="btn sm" data-a="view" data-v="${u.id}">View work (${u.samples.length})</button></div>
+<div>${u.types.map(t=>`<span class="tag">${ICON[t]} ${t}</span>`).join('')}</div></div>`).join('')}
+function myjobs(){const d=S.d,mine=S.jobs.filter(j=>j.by===S.me.id);return `<h2>Post a job</h2><div class="card">
+<label>What do you need?</label><input data-f="jtitle" value="${E(d.jtitle||'')}" placeholder="e.g. Edit my 5 min vlog">
+<label>Type</label><select data-f="jtype">${opts(d.jtype||TYPES[0])}</select>
+<label>Payment</label><select data-f="jpay">${['Free (for credit)','Small budget','Negotiable'].map(p=>`<option ${d.jpay===p?'selected':''}>${p}</option>`).join('')}</select>
+<label>Details</label><textarea data-f="jdesc" rows="2">${E(d.jdesc||'')}</textarea><button class="btn" data-a="postjob">Post job</button></div>
+<h2>My jobs</h2>${mine.length?mine.map(j=>`<div class="card"><b>${E(j.title)}</b> <span class="tag">${E(j.type)}</span><span class="tag">${E(j.pay)}</span>
+${j.applicants.length?j.applicants.map(a=>`<div class="row"><span>${E(U(a).name)}</span><span><button class="btn ghost sm" data-a="view" data-v="${a}">View work</button> <button class="btn ghost sm" data-a="chat" data-v="${a}">💬 Chat</button> ${j.hired===a?'✅ Hired':`<button class="btn sm" data-a="hire" data-v="${j.id}|${a}">Hire</button>`}</span></div>`).join(''):'<div class="mut">No applicants yet.</div>'}</div>`).join(''):'<p class="mut">No jobs yet.</p>'}`}
+const ck=(a,b)=>[a,b].sort().join('|');
+function fx(){const i=document.querySelector('[data-f=msg]');if(i)i.focus();const m=document.getElementById('msgs');if(m)m.scrollTop=m.scrollHeight}
+function chatView(){const o=U(S.chat),m=S.chats[ck(S.me.id,S.chat)]||[];return `<button class="btn ghost sm" data-a="closechat">← Back</button><h2>Chat with ${E(o.name)}</h2><div id="msgs" class="card" style="min-height:200px;max-height:50vh;overflow-y:auto">${m.length?m.map(x=>`<div style="text-align:${x.f===S.me.id?'right':'left'};margin-bottom:8px"><span class="tag" style="background:${x.f===S.me.id?'var(--acc)':'var(--dark)'};border-radius:14px;padding:6px 12px;font-size:15px;max-width:80%;text-align:left">${E(x.t)}</span></div>`).join(''):'<div class="mut">Say hi and share what you need.</div>'}</div><div class="row" style="flex-wrap:nowrap"><input data-f="msg" value="${E(S.d.msg||'')}" placeholder="Type a message" style="margin:0"><button class="btn" data-a="send">Send</button></div>`}
+function chatsList(){const ks=Object.keys(S.chats).filter(k=>k.split('|').includes(S.me.id));return '<h2>Chats</h2>'+(ks.length?ks.map(k=>{const o=U(k.split('|').find(x=>x!==S.me.id)),l=S.chats[k].slice(-1)[0];return `<div class="card row"><div><b>${E(o.name)}</b><div class="mut">${E(l.t)}</div></div><button class="btn sm" data-a="chat" data-v="${o.id}">Open</button></div>`}).join(''):'<p class="mut">No chats yet. Tap 💬 Chat on a job or an editor to start talking.</p>')}
+function render(){let h=head();
+if(S.view==='welcome')h+=welcome();else if(S.view==='signup')h+=signup();
+else if(S.me.role==='student'){h+=S.chat?chatView():tabs([['jobs','Jobs'],['samples','My work'],['chats','Chats']])+(S.tab==='jobs'?studentJobs():S.tab==='chats'?chatsList():studentSamples())}
+else{h+=S.chat?chatView():tabs([['editors','Find editors'],['myjobs','My jobs'],['chats','Chats']])+(S.tab==='editors'?editors():S.tab==='chats'?chatsList():myjobs())}
+document.getElementById('app').innerHTML=h}
+document.addEventListener('input',e=>{const f=e.target.dataset.f;if(f)S.d[f]=e.target.value});
+document.addEventListener('change',e=>{if(e.target.dataset.file&&e.target.files[0]){const r=new FileReader();r.onload=()=>{S.d.simg=r.result;render()};r.readAsDataURL(e.target.files[0])}if(e.target.dataset.f==='stype'||e.target.dataset.f==='jtype'||e.target.dataset.f==='jpay')S.d[e.target.dataset.f]=e.target.value});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+if(a==='pick'){S.role=v;S.d={types:[]};S.view='signup'}
+else if(a==='out'){S.me=null;S.view='welcome';S.d={types:[]};S.viewing=null;S.chat=null}
+else if(a==='chip'){const t=S.d.types,i=t.indexOf(v);i<0?t.push(v):t.splice(i,1)}
+else if(a==='join'){const d=S.d;if(!d.name||!d.handle||!d.types.length){toast('Please add your name, ID and pick at least one work type');return}
+const u={id:'u'+(S.n++),role:S.role,name:d.name,handle:d.handle,types:d.types,samples:[]};S.users.push(u);S.me=u;S.d={types:[]};S.view='app';S.tab=u.role==='student'?'jobs':'editors';toast('Welcome, '+u.name+'!')}
+else if(a==='tab'){S.tab=v;S.viewing=null;S.chat=null}
+else if(a==='apply'){const j=S.jobs.find(x=>x.id===v);j.applicants.push(S.me.id);toast('Applied! The creator can now see your work')}
+else if(a==='addsample'){const d=S.d;if(!d.stitle){toast('Give your sample a title');return}
+S.me.samples.unshift({title:d.stitle,type:d.stype||TYPES[0],desc:d.sdesc||'',img:d.simg||''});S.d={types:[]};toast('Sample added!')}
+else if(a==='del'){S.me.samples.splice(+v,1)}
+else if(a==='view'){S.viewing=v;S.tab='editors'}
+else if(a==='back'){S.viewing=null}
+else if(a==='chat'){S.chat=v;S.d.msg=''}
+else if(a==='closechat'){S.chat=null;S.tab='chats'}
+else if(a==='send'){const t=(S.d.msg||'').trim();if(!t)return;const o=S.chat,k=ck(S.me.id,o);(S.chats[k]=S.chats[k]||[]).push({f:S.me.id,t});S.d.msg='';
+if(['s1','s2','c1'].includes(o))setTimeout(()=>{S.chats[k].push({f:o,t:U(o).role==='student'?'Hi! Sounds interesting. Can you share more details?':'Thanks! Please send a short sample so I can see your style.'});if(S.chat===o){render();fx()}else toast('New message from '+U(o).name)},1200)}
+else if(a==='invite'){toast('Invite sent to '+U(v).name)}
+else if(a==='postjob'){const d=S.d;if(!d.jtitle){toast('Add a title for your job');return}
+S.jobs.unshift({id:'j'+(S.n++),by:S.me.id,title:d.jtitle,type:d.jtype||TYPES[0],pay:d.jpay||'Free (for credit)',desc:d.jdesc||'',applicants:[],hired:null});S.d={types:[]};toast('Job posted!')}
+else if(a==='hire'){const [j,s]=v.split('|');S.jobs.find(x=>x.id===j).hired=s;toast(U(s).name+' is hired!')}
+render();if(S.chat)setTimeout(fx,0)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset.f==='msg'){const b=document.querySelector('[data-a=send]');if(b)b.click()}});
+render();
+</script>
+</body>
+</html>
